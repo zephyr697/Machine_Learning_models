@@ -1,0 +1,52 @@
+def gradient_descent(x,y):
+    m_curr = 0
+    b_curr = 0
+    n = len(x)
+    l_r = 0.001
+    
+    for i in range(1000):
+        y_pred = m_curr*x + b_curr
+        cost = (1/n)*((y-y_pred)**2).sum()
+        md = -(2/n)*(x * (y-y_pred)).sum()
+        bd = -(2/n)*(y-y_pred).sum()
+        m_curr += -l_r * md
+        b_curr += -l_r*bd
+        print("m {}, b {}, i {}, cost {}".format(m_curr,b_curr,i,cost))
+    return m_curr,b_curr
+
+
+def generic_GradientDescent(x,alpha):
+#     m,n = x.shape
+    w = np.zeros(13)
+    b = 0
+    X = x[:,:13]
+    Y = x[:,13]
+    for i in range(1000):
+        Z = forwardProp(w,X,b)
+        error = cost(Y,Z)
+        print(error)
+        dw,db = back_prop(Z,Y,X)
+        w,b = gd_update(dw,db,w,b,alpha)
+    return w,b
+
+def forwardProp(w,X,b):
+    Z = np.dot(w,X.T)+b
+    return Z
+
+def cost(Y,Z):
+    m = len(Y)
+    Error = (1/(2*m))*np.sum(np.square(Y-Z))
+    return Error
+
+def back_prop(Z,Y,X):
+    m,n = X.shape
+    dz = (1/m)*(Z-Y)
+    dw = np.dot(dz,X)
+    db = np.sum(dz)
+    return dw,db
+
+def gd_update(dw,db,w,b,alpha):
+    w = w - alpha*dw
+    b = b - alpha*db
+    return w,b
+
