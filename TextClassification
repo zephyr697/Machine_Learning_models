@@ -1,0 +1,53 @@
+def fit(X_train, Y_train):
+    result = {}
+    class_values = set(Y_train)
+    for curr_class in class_values:
+        result[curr_class] = {}
+        result["total_data"] = len(Y_train)
+        curr_class_rows = (Y_train == curr_class)
+        X_train_curr = X_train[curr_class_rows]
+        Y_train_curr = Y_train[curr_class_rows]
+        num_features = X_train.shape[1]
+        result[curr_class]["total_count"] = len(Y_train_curr)
+        for j in range(1,num_features+1):
+#             j_1 = j-1
+            result[curr_class][j] = {}
+            all_possible_value = set(X_train[:,j-1])
+            for curr_val in all_possible_value:
+                result[curr_class][j][curr_val] = (X_train_curr[:,j] == curr_val).sum() 
+    return result
+    def probability(dictionary,x,curr_calss):
+    
+    output = np.log(dictionary[curr_calss]["total_count"])-np.log(dictionary["total_data"])
+    
+    num_features = len(dictionary[curr_calss].keys()) -1
+    
+    for j in range(1,num_features+1):
+        xj = x[j-1]
+        count_curr_class_with_value_xj = dictionary[curr_calss][j][xj]+1
+        count_curr_class = dictionary[curr_calss]["total_count"] + len(dictionary[curr_calss][j].keys())
+        current_xj_probability = np.log(count_curr_class_with_value_xj)-np.log(count_curr_class_with_value_xj)
+        output = output + current_xj_probability
+    return output
+
+def predictSinglePoint(dictionary,x):
+    classes = dictionary.keys()
+    best_p = -100
+    best_class = -1
+    first_run = True
+    for curr_calss in classes:
+        if curr_calss =="total_data":
+            continue
+        p_current_class = probability(dictionary,x,curr_calss)
+        if first_run or p_current_class > best_p:
+            best_p = p_current_class
+            best_class = curr_calss
+        first_run = False
+    return best_class
+
+def predict(dictionary,X_test):
+    y_pred = [] 
+    for x in X_test:
+        x_class = predictSinglePoint(dictionary,x)
+        y_pred.append(x_class)
+    return y_pred
